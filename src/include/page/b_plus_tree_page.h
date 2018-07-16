@@ -30,18 +30,22 @@ namespace cmudb {
   template <typename KeyType, typename ValueType, typename KeyComparator>
 
 // define page type enum
-enum class IndexPageType { INVALID_INDEX_PAGE = 0, LEAF_PAGE, INTERNAL_PAGE };
+enum class IndexPageType { INVALID_INDEX_PAGE = 0, LEAF_PAGE, 
+                           INTERNAL_PAGE};
 
 // Abstract class.
 class BPlusTreePage {
 public:
   bool IsLeafPage() const;
   bool IsRootPage() const;
+
   void SetPageType(IndexPageType page_type);
+  IndexPageType GetPageType() const;
 
   int GetSize() const;
   void SetSize(int size);
   void IncreaseSize(int amount);
+  void DecreaseSize(int amount);
 
   int GetMaxSize() const;
   void SetMaxSize(int max_size);
@@ -52,6 +56,10 @@ public:
 
   page_id_t GetPageId() const;
   void SetPageId(page_id_t page_id);
+
+  //Custome Helper methods
+  //Returns the size of the header for leaf/internal pages
+  int GetHeaderSize() const;
 
 private:
   // member variable, attributes that both internal and leaf page share

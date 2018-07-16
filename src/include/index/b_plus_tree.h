@@ -62,6 +62,7 @@ public:
   B_PLUS_TREE_LEAF_PAGE_TYPE *FindLeafPage(const KeyType &key,
                                            bool leftMost = false);
 
+  B_PLUS_TREE_INTERNAL_PG_PGID* GetNewRoot();
 private:
   void StartNewTree(const KeyType &key, const ValueType &value);
 
@@ -77,6 +78,7 @@ private:
   template <typename N>
   bool CoalesceOrRedistribute(N *node, Transaction *transaction = nullptr);
 
+
   template <typename N>
   bool Coalesce(
       N *&neighbor_node, N *&node,
@@ -89,11 +91,16 @@ private:
 
   void UpdateRootPageId(int insert_record = false);
 
+
+  int CheckMergeSibbling(int parent_index, B_PLUS_TREE_INTERNAL_PG_PGID *parent,
+              int cur_node_size, int node_max_size, int &redistribute_idx);
+
   // member variable
   std::string index_name_;
   page_id_t root_page_id_;
   BufferPoolManager *buffer_pool_manager_;
   KeyComparator comparator_;
+  INDEXITERATOR_TYPE iter;
 };
 
 } // namespace cmudb

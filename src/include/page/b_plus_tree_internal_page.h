@@ -25,6 +25,10 @@ namespace cmudb {
 #define B_PLUS_TREE_INTERNAL_PAGE_TYPE                                         \
   BPlusTreeInternalPage<KeyType, ValueType, KeyComparator>
 
+#define B_PLUS_TREE_INTERNAL_PG_PGID                                           \
+  BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator>
+
+
 INDEX_TEMPLATE_ARGUMENTS
 class BPlusTreeInternalPage : public BPlusTreePage {
 public:
@@ -53,6 +57,12 @@ public:
   void MoveLastToFrontOf(BPlusTreeInternalPage *recipient,
                          int parent_index,
                          BufferPoolManager *buffer_pool_manager);
+
+  void MoveFirstNTo(BPlusTreeInternalPage *recipient, int move_size,
+               BufferPoolManager  *buffer_pool_manager);
+  void MoveLastNTo(BPlusTreeInternalPage *recipient, int move_size,
+               BufferPoolManager  *buffer_pool_manager);
+
   // DEUBG and PRINT
   std::string ToString(bool verbose) const;
   void QueueUpChildren(std::queue<BPlusTreePage *> *queue,
@@ -67,6 +77,12 @@ private:
                     BufferPoolManager *buffer_pool_manager);
   void CopyFirstFrom(const MappingType &pair, int parent_index,
                      BufferPoolManager *buffer_pool_manager);
+
+  void CopyFirstNFrom(MappingType *items, int size,
+                 BufferPoolManager *buffer_pool_manager);
+  void CopyLastNFrom(MappingType *items, int size,
+                 BufferPoolManager *buffer_pool_manager);
+
   MappingType array[0];
 };
 } // namespace cmudb
