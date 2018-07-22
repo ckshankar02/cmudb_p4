@@ -55,6 +55,7 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
       //Fetch a victim page
       if(!replacer_->Victim(tmp_page)) {
         latch_.unlock();
+				std::cout<<"All page are pinned\n";
         return nullptr; //all pages are pinned
       }
 
@@ -93,6 +94,8 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
 bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
   Page *tmp_page = NULL;
 
+	is_dirty = true;
+
   latch_.lock();
   if(page_table_->Find(page_id, tmp_page)){
     //Pin count is already '0'
@@ -105,12 +108,14 @@ bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
     tmp_page->pin_count_--;
     
     if(tmp_page->pin_count_ == 0) {
+    	tmp_page->is_dirty_ = is_dirty; 
       replacer_->Insert(tmp_page); //Inserting into LRU replacer
-      tmp_page->is_dirty_ = is_dirty; 
       latch_.unlock();
       return true;
     }
-  } 
+  }
+	else
+		std::cout<<"Unpin: Page Not Found "<<page_id<<std::endl; 
 
   latch_.unlock();
   return false;

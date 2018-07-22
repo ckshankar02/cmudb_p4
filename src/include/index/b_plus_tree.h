@@ -63,6 +63,9 @@ public:
                                            bool leftMost = false);
 
   B_PLUS_TREE_INTERNAL_PG_PGID* GetNewRoot();
+
+	void AdjustNextPageId(BPlusTreePage *new_pg,
+											B_PLUS_TREE_INTERNAL_PG_PGID *parent_pg);
 private:
   void StartNewTree(const KeyType &key, const ValueType &value);
 
@@ -100,7 +103,6 @@ private:
   page_id_t root_page_id_;
   BufferPoolManager *buffer_pool_manager_;
   KeyComparator comparator_;
-  INDEXITERATOR_TYPE iter;
 };
 
 } // namespace cmudb

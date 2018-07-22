@@ -56,7 +56,9 @@ int B_PLUS_TREE_INTERNAL_PAGE_TYPE::ValueIndex(const ValueType &value) const
   for(int i=0;i<this->GetSize();i++)
   {
     if(this->array[i].second == value)
+		{
       return i;
+		}
   }
   return INVALID_INDEX;
 }
@@ -146,8 +148,9 @@ int B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(
     const ValueType &old_value, const KeyType &new_key,
     const ValueType &new_value) 
 {
+
   int idx = this->ValueIndex(old_value);
-  
+
   if(idx == INVALID_INDEX) 
       return this->GetSize();
 
@@ -165,6 +168,18 @@ int B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(
 /*****************************************************************************
  * SPLIT
  *****************************************************************************/
+
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_INTERNAL_PAGE_TYPE::UpdateChildParentPageId(
+		page_id_t child_pg_id, BufferPoolManager *bpm,
+														 page_id_t parent_pg_id)
+{
+		BPlusTreePage *child_pg = (BPlusTreePage *)bpm->FetchPage(child_pg_id);
+		child_pg->SetParentPageId(parent_pg_id);		
+		bpm->UnpinPage(child_pg_id, true);
+}
+
 /*
  * Remove half of key & value pairs from this page to "recipient" page
  */
@@ -193,7 +208,17 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyHalfFrom(
  
     for(int i=0;i<this->GetSize();i++) 
     {
+				//BPlusTreePage *child_pg;
         this->array[i] = items[start_idx];
+
+				this->UpdateChildParentPageId(this->array[i].second, 
+																								buffer_pool_manager, 
+																								this->GetPageId());
+							
+				//child_pg = (BPlusTreePage *)buffer_pool_manager->FetchPage(this->array[i].second);
+				//child_pg->SetParentPageId(this->GetPageId());
+				//buffer_pool_manager->UnpinPage(child_pg->GetPageId(), true);
+
 				start_idx++;
     }  
     
@@ -258,8 +283,12 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyAllFrom(
     
     for(int i=0;i<size;i++) 
     {
-      this->array[start_idx++] = items[i];     
-    } 
+      this->array[start_idx] = items[i];     
+			this->UpdateChildParentPageId(this->array[start_idx].second, 
+																								buffer_pool_manager, 
+																								this->GetPageId());
+    	start_idx++;
+		} 
 
     this->IncreaseSize(size);
 }
@@ -323,6 +352,10 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyLastFrom(
     buffer_pool_manager->UnpinPage(this->GetParentPageId(), true);*/
 
     this->array[this->GetSize()] = pair;
+		
+		this->UpdateChildParentPageId(this->array[this->GetSize()].second, 
+																								buffer_pool_manager, 
+																								this->GetPageId());
     this->IncreaseSize(1);
 }
 
@@ -372,6 +405,11 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(
     BufferPoolManager *buffer_pool_manager) 
 {
     this->array[insert_index] = pair;
+
+		this->UpdateChildParentPageId(this->array[insert_index].second, 
+																								buffer_pool_manager, 
+																								this->GetPageId());
+		this->IncreaseSize(1);
     /*BPlusTreeInternalPage *parent = 
                     buffer_pool_manager->FetchPage(this->GetParentPageId());
 

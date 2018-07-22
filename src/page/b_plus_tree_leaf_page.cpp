@@ -27,6 +27,7 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::Init(page_id_t page_id, page_id_t parent_id)
   this->SetSize(0);
   this->SetPageId(page_id);
   this->SetParentPageId(parent_id);
+	this->SetNextPageId(INVALID_PAGE_ID);
 
   max_size = (PAGE_SIZE-this->GetHeaderSize())/sizeof(MappingType);
   this->SetMaxSize(max_size); 
@@ -236,7 +237,6 @@ bool B_PLUS_TREE_LEAF_PAGE_TYPE::Lookup(const KeyType &key, ValueType &value,
   int mid = 0;
   int8_t cmp_result = 0;
 
-
   while(sidx <= eidx)
   {
       mid = (sidx+eidx)>>1;
@@ -431,7 +431,7 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyFirstFrom(
  *****************************************************************************/
 INDEX_TEMPLATE_ARGUMENTS
 std::string B_PLUS_TREE_LEAF_PAGE_TYPE::ToString(bool verbose) const {
-  if (GetSize() == 0) {
+  /*if (GetSize() == 0) {
     return "";
   }
   std::ostringstream stream;
@@ -455,7 +455,17 @@ std::string B_PLUS_TREE_LEAF_PAGE_TYPE::ToString(bool verbose) const {
     }
     ++entry;
   }
-  return stream.str();
+  return stream.str();*/
+
+	std::cout<<"Content of Leaf Page "<<this->GetPageId()<<":\n";
+	
+	for(int x =0;x<this->GetSize(); x++)
+	{
+			std::cout<<this->KeyAt(x)<<"\t";
+	}
+
+	std::cout<<std::endl;
+	return " ";
 }
 
 template class BPlusTreeLeafPage<GenericKey<4>, RID,

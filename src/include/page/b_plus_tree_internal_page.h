@@ -68,6 +68,10 @@ public:
   void QueueUpChildren(std::queue<BPlusTreePage *> *queue,
                        BufferPoolManager *buffer_pool_manager);
 
+	void UpdateChildParentPageId(page_id_t child_pg_id, 
+																	BufferPoolManager *buffer_pool_manager, 
+																									page_id_t parent_pg_id);
+
 private:
   void CopyHalfFrom(MappingType *items, int size,
                     BufferPoolManager *buffer_pool_manager);
