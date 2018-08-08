@@ -281,7 +281,7 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeLeafPage *recipient,
         recipient->CopyLastFrom(this->array[i]);
 		}
 
-    for(int i=0;i<move_size;i++)
+    for(int i=0;i<this->GetSize()-move_size;i++)
 		{
         this->array[i] = this->array[i+move_size];
 		}

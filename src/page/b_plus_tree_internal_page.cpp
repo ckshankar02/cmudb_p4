@@ -237,9 +237,11 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyHalfFrom(
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Remove(int index) 
 {
-    for(int i=index;i<this->GetSize();i++)
-        this->array[i] = this->array[i+1];
-
+    for(int i=index;i<this->GetSize()-1;i++)
+		{
+        this->array[i].first  = this->array[i+1].first;
+        this->array[i].second = this->array[i+1].second;
+		}
     this->DecreaseSize(1);
 }
 

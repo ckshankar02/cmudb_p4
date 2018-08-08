@@ -74,10 +74,13 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
     disk_manager_.ReadPage(tmp_page->page_id_,
                         tmp_page->data_);
   }
+	else
+	{
+  	replacer_->Erase(tmp_page);
+	}
     
   //Set page metadata
   tmp_page->pin_count_++;
-  replacer_->Erase(tmp_page);
   //Insert page into the page table
   page_table_->Insert(page_id, tmp_page);
   latch_.unlock();
@@ -94,21 +97,25 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
 bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
   Page *tmp_page = NULL;
 
-	is_dirty = true;
+	//is_dirty = true;
 
   latch_.lock();
   if(page_table_->Find(page_id, tmp_page)){
     //Pin count is already '0'
-    if(!tmp_page->pin_count_) {
+    if(tmp_page->pin_count_ <= 0) {
       latch_.unlock();
       return false;
     }
     
     //Unpin once
     tmp_page->pin_count_--;
-    
-    if(tmp_page->pin_count_ == 0) {
+		if(!tmp_page->is_dirty_)
+		{
     	tmp_page->is_dirty_ = is_dirty; 
+		}    
+
+    if(tmp_page->pin_count_ <= 0) {
+    	//tmp_page->is_dirty_ = is_dirty; 
       replacer_->Insert(tmp_page); //Inserting into LRU replacer
       latch_.unlock();
       return true;
@@ -273,8 +280,10 @@ bool BufferPoolManager::AddToFreeList(Page *tmp_page) {
     //Removing the selected page from the LRU replacer
     replacer_->Erase(tmp_page);
     //Removing the corresponding entry from the page table
-    page_table_->Remove(tmp_page->page_id_);  
-    CleanPage(tmp_page);  //Helper function to reset page
+    if(!page_table_->Remove(tmp_page->page_id_))
+			std::cout<<"****NOT REMOVED*****";  
+    
+		CleanPage(tmp_page);  //Helper function to reset page
     free_list_->push_back(tmp_page);
     return true;    
 }
